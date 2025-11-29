@@ -1,6 +1,6 @@
 from typing import Annotated
 import wikipedia # type: ignore[import]
-import web_search_mcp.log_modules.log_settings as log_settings
+import web_search_util.log.log_settings as log_settings
 logger = log_settings.getLogger(__name__)
 
 def search_wikipedia_ja(query: Annotated[str, "String to search for"], lang: Annotated[str, "Language of Wikipedia"], num_results: Annotated[int, "Maximum number of results to display"]) -> list[str]:

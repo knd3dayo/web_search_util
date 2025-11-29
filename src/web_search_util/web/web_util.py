@@ -1,7 +1,4 @@
-
-from typing import Any, Union
 from typing import Annotated
-import json
 import os
 from playwright.async_api import async_playwright
 from ddgs import DDGS
@@ -26,7 +23,7 @@ class PlaywrightSettings(BaseSettings):
             return ""
         return self.auth_json_path
 
-import web_search_mcp.log_modules.log_settings as log_settings
+import web_search_util.log.log_settings as log_settings
 logger = log_settings.getLogger(__name__)
 
 class WebSearchResult(BaseModel):

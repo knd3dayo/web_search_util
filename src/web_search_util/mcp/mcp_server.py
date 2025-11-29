@@ -1,13 +1,11 @@
-
-import os, sys
 import asyncio
 from typing import Annotated, Any
 from dotenv import load_dotenv
 import argparse
 from fastmcp import FastMCP
 from pydantic import Field
-from web_search_mcp.web_modules.search_wikipedia_ja import search_wikipedia_ja
-from web_search_mcp.web_modules.web_util import WebUtil, WebSearchResult
+from web_search_util.web.search_wikipedia_ja import search_wikipedia_ja
+from web_search_util.web.web_util import WebUtil, WebSearchResult
 
 mcp = FastMCP("web_search_mcp") #type :ignore
 
