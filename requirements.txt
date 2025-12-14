@@ -6,5 +6,8 @@ wikipedia
 playwright
 ddgs 
 
+# For API
+fastapi
+
 # For MCP
 fastmcp

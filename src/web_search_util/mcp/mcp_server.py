@@ -1,52 +1,14 @@
 import asyncio
-from typing import Annotated, Any
 from dotenv import load_dotenv
 import argparse
 from fastmcp import FastMCP
-from pydantic import Field
-from web_search_util.web.search_wikipedia_ja import search_wikipedia_ja
-from web_search_util.web.web_util import WebUtil, WebSearchResult
-
-mcp = FastMCP("web_search_mcp") #type :ignore
-
-# toolは実行時にmcp.tool()で登録する。@mcp.toolは使用しない。
-# Wikipedia検索ツールを登録
-def search_wikipedia_ja_mcp(
-    query: Annotated[str, Field(description="String to search for")], 
-    lang: Annotated[str, Field(description="Language of Wikipedia")], 
-    num_results: Annotated[int, Field(description="Maximum number of results to display")]
-    ) -> Annotated[list[str], Field(description="List of related articles from Wikipedia")]:
-    """
-    This function searches Wikipedia with the specified keywords and returns related articles.
-    """
-    return search_wikipedia_ja(query, lang, num_results)
-
-# duckduckgo_searchツールで検索した結果を返す
-async def ddgs_search(
-    query: Annotated[str, "The search query"],
-    max_results: Annotated[int, "Maximum number of results to return"] = 10,
-    site: Annotated[str, "Site to restrict the search to (optional)"] = "",
-    detail: Annotated[bool, "If True, returns detailed results including the page content and a list of links from the result pages. Default is False"] = False
-) -> Annotated[list[WebSearchResult], "List of search results from DuckDuckGo"]:
-    return await WebUtil.ddgs_search(query, max_results, site, detail)
-        
-        
-# 指定したURLのWebページからテキストとリンクを抽出するツールを登録
-async def extract_webpage_mcp(
-    url: Annotated[str, "URL of the web page to extract text and links from"]
-) -> Annotated[dict[str, Any], "Dictionary containing 'output' (extracted text) and 'urls' (list of links with href and link text)"]:
-    text, urls = await WebUtil.extract_webpage(url)
-    result: dict[str, Any] = {}
-    result["output"] = text
-    result["urls"] = urls
-    return result
-
-# ファイルをダウンロードするツールを登録
-def download_file_mcp(
-    url: Annotated[str, "URL of the file to download"],
-    save_path: Annotated[str, "Path to save the downloaded file"]
-) -> Annotated[bool, "True if the file was downloaded successfully, False otherwise"]:
-    return WebUtil.download_file(url, save_path)
+from web_search_util.api.api_server import (
+    search_wikipedia,
+    ddgs_search,
+    extract_webpage,
+    download_file
+)   
+mcp = FastMCP()
 
 # 引数解析用の関数
 def parse_args() -> argparse.Namespace:
@@ -84,10 +46,10 @@ async def main():
                 print(f"Warning: Tool '{tool_name}' not found or not callable. Skipping registration.")
     else:
         # デフォルトのツールを登録
-        mcp.tool()(search_wikipedia_ja_mcp)
+        mcp.tool()(search_wikipedia)
         mcp.tool()(ddgs_search)
-        mcp.tool()(extract_webpage_mcp)
-        mcp.tool()(download_file_mcp)
+        mcp.tool()(extract_webpage)
+        mcp.tool()(download_file)
 
     if mode == "stdio":
         await mcp.run_async()
