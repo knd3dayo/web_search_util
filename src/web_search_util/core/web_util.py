@@ -65,14 +65,16 @@ class WebUtil:
 
 
     @classmethod
-    async def extract_webpage(cls, url: Annotated[str, "URL of the web page to extract text and links from"]) -> Annotated[tuple[str, list[tuple[str, str]]], "Page text, list of links (absolute href and link text from <a> tags)"]:
+    async def extract_webpage(
+        cls, 
+        url: Annotated[str, "URL of the web page to extract text and links from"]
+        ) -> Annotated[WebSearchResult|None, "Page text, list of links (absolute href and link text from <a> tags)"]:
         """
         This function extracts text and links from the specified URL of a web page.
         リンクは絶対URLで返す。
         """
         settings = PlaywrightSettings()
         browser = None
-        result = ("", [])
         try:
             async with async_playwright() as p:
                 auth_json_path = settings.get_valid_auth_json_path()
@@ -84,11 +86,10 @@ class WebUtil:
                 await page.goto(url)
                 page_html = await page.content()
                 soup = BeautifulSoup(page_html, "html.parser")
+                page_title = await page.title()
+
                 text = soup.get_text()
                 sanitized_text = cls.sanitize_text(text)
-                if not sanitized_text or len(sanitized_text) == 0:
-                    return result
-
                 # <a>タグのhrefを絶対URL化して取得
                 urls: list[tuple[str, str]] = []
                 for a in soup.find_all("a"):
@@ -99,14 +100,20 @@ class WebUtil:
                             abs_url = cls.get_absolute_url(url, str(href))
                             urls.append((abs_url, link_text))
 
-                result = (sanitized_text, urls)
+                result = WebSearchResult(
+                    title=page_title,
+                    href=url,
+                    body=sanitized_text,
+                    page_content=sanitized_text,
+                    links=urls
+                )
+                return result
 
         except Exception as e:
             logger.error(f"Error extracting webpage: {e}")
         finally:
             if browser:
                 await browser.close()
-        return result
 
     @classmethod
     async def ddgs_search(
@@ -128,12 +135,17 @@ class WebUtil:
         if site:
             query = f"site:{site} {query}"
         results = DDGS().text(query, max_results=max_results)
-        search_results = [WebSearchResult(title=res.get("title", ""), href=res.get("href", ""), body=res.get("body", "")) for res in results]
+        search_results = [
+            WebSearchResult(
+                title=res.get("title", ""), href=res.get("href", ""), 
+                body=res.get("body", "")) for res in results]
+
         if detail:
             for res in search_results:
                 logger.debug(f"Title: {res.title}\nURL: {res.href}\nBody: {res.body}\n")
-                page_content, links = await cls.extract_webpage(res.href)
-                res.page_content = page_content
+                page = await cls.extract_webpage(res.href)
+                res.page_content = page.page_content if page else ""
+                links: list[tuple[str, str]] = page.links if page else []
                 res.links = links
 
         return search_results

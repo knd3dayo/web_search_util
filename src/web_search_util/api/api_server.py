@@ -1,7 +1,7 @@
 from typing import Annotated, Any
 from dotenv import load_dotenv
 from pydantic import Field
-from web_search_util.core.search_wikipedia_ja import search_wikipedia_ja
+from web_search_util.core.search_wikipedia import search_wikipedia
 from web_search_util.core.web_util import WebUtil, WebSearchResult
 from fastapi import FastAPI, APIRouter
 
@@ -18,7 +18,7 @@ def search_wikipedia(
     """
     This function searches Wikipedia with the specified keywords and returns related articles.
     """
-    return search_wikipedia_ja(query, lang, num_results)
+    return search_wikipedia(query, lang, num_results)
 
 # duckduckgo_searchツールで検索した結果を返す
 @router.get("/ddgs_search")
@@ -35,15 +35,13 @@ async def ddgs_search(
 @router.get("/extract_webpage")
 async def extract_webpage(
     url: Annotated[str, "URL of the web page to extract text and links from"]
-) -> Annotated[dict[str, Any], "Dictionary containing 'output' (extracted text) and 'urls' (list of links with href and link text)"]:
-    text, urls = await WebUtil.extract_webpage(url)
-    result: dict[str, Any] = {}
-    result["output"] = text
-    result["urls"] = urls
-    return result
+) -> Annotated[WebSearchResult|None, "Dictionary containing 'output' (extracted text) and 'urls' (list of links with href and link text)"]:
+    web_search_result = await WebUtil.extract_webpage(url)
+    return web_search_result
+
 
 # ファイルをダウンロードするツールを登録
-@router.get("/download_file", response_model=bool)
+@router.get("/download_file")
 def download_file(
     url: Annotated[str, "URL of the file to download"],
     save_path: Annotated[str, "Path to save the downloaded file"]
