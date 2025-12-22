@@ -9,7 +9,7 @@ app = FastAPI()
 router = APIRouter()
 
 # Wikipedia検索ツールを登録
-@router.get("/search_wikipedia", response_model=list[str])
+@router.get("/search_wikipedia")
 def search_wikipedia(
     query: Annotated[str, Field(description="String to search for")], 
     lang: Annotated[str, Field(description="Language of Wikipedia")], 
@@ -21,7 +21,7 @@ def search_wikipedia(
     return search_wikipedia_ja(query, lang, num_results)
 
 # duckduckgo_searchツールで検索した結果を返す
-@router.get("/ddgs_search", response_model=list[WebSearchResult])
+@router.get("/ddgs_search")
 async def ddgs_search(
     query: Annotated[str, "The search query"],
     max_results: Annotated[int, "Maximum number of results to return"] = 10,
@@ -32,7 +32,7 @@ async def ddgs_search(
         
         
 # 指定したURLのWebページからテキストとリンクを抽出するツールを登録
-@router.get("/extract_webpage", response_model=dict[str, Any])
+@router.get("/extract_webpage")
 async def extract_webpage(
     url: Annotated[str, "URL of the web page to extract text and links from"]
 ) -> Annotated[dict[str, Any], "Dictionary containing 'output' (extracted text) and 'urls' (list of links with href and link text)"]:
