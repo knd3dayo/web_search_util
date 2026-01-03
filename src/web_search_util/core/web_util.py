@@ -61,22 +61,18 @@ class WebUtil:
         return urljoin(base_url, href)
 
     @classmethod
-    def download_file(cls, url: str, save_dir: str, file_name: Optional[str] = None) -> bool:
+    def download_file(cls, url: str, save_dir: str, file_name: Optional[str] = None) -> str:
         import requests
-        try:
-            response = requests.get(url)
-            response.raise_for_status()  # HTTPエラーが発生した場合に例外をスロー
-            if not file_name:
-                file_name = cls.get_file_name_from_url(url)
-            save_path = os.path.join(save_dir, file_name)
+        response = requests.get(url)
+        response.raise_for_status()  # HTTPエラーが発生した場合に例外をスロー
+        if not file_name:
+            file_name = cls.get_file_name_from_url(url)
+        save_path = os.path.join(save_dir, file_name)
 
-            with open(save_path, 'wb') as file:
-                file.write(response.content)
-            logger.info(f"File downloaded successfully: {save_path}")
-            return True
-        except Exception as e:
-            logger.error(f"Error downloading file: {e}")
-            return False
+        with open(save_path, 'wb') as file:
+            file.write(response.content)
+        logger.info(f"File downloaded successfully: {save_path}")
+        return save_path
 
 
     @classmethod

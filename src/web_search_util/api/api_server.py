@@ -46,7 +46,7 @@ def download_file(
     url: Annotated[str, "URL of the file to download"],
     save_dir: Annotated[str, "Directory to save the downloaded file"],
     file_name: Annotated[Optional[str], "Name of the file to save (optional)"] = None
-) -> Annotated[bool, "True if the file was downloaded successfully, False otherwise"]:
+) -> Annotated[str, "Path to the downloaded file"]:
     return WebUtil.download_file(url, save_dir, file_name)
 
 app.include_router(router, prefix="/api/web_search_util")
