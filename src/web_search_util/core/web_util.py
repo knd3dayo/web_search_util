@@ -1,4 +1,4 @@
-from typing import Annotated
+from typing import Annotated, Optional
 import os
 from playwright.async_api import async_playwright
 from ddgs import DDGS
@@ -37,6 +37,17 @@ class WebSearchResult(BaseModel):
 class WebUtil:
 
     @staticmethod
+    def get_file_name_from_url(url: str) -> str:
+        """
+        URLからファイル名を抽出する。
+        例: https://example.com/path/to/file.txt -> file.txt
+        """
+        from urllib.parse import urlparse
+        import os
+        parsed_url = urlparse(url)
+        return os.path.basename(parsed_url.path)
+
+    @staticmethod
     def get_absolute_url(base_url: str, href: str) -> str:
         """
         hrefが相対パスの場合はbase_urlと結合して絶対URLに変換。
@@ -50,11 +61,15 @@ class WebUtil:
         return urljoin(base_url, href)
 
     @classmethod
-    def download_file(cls, url: str, save_path: str) -> bool:
+    def download_file(cls, url: str, save_dir: str, file_name: Optional[str] = None) -> bool:
         import requests
         try:
             response = requests.get(url)
             response.raise_for_status()  # HTTPエラーが発生した場合に例外をスロー
+            if not file_name:
+                file_name = cls.get_file_name_from_url(url)
+            save_path = os.path.join(save_dir, file_name)
+
             with open(save_path, 'wb') as file:
                 file.write(response.content)
             logger.info(f"File downloaded successfully: {save_path}")

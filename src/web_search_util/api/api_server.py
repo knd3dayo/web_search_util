@@ -1,4 +1,4 @@
-from typing import Annotated, Any
+from typing import Annotated, Optional
 from dotenv import load_dotenv
 from pydantic import Field
 from web_search_util.core.search_wikipedia import search_wikipedia
@@ -44,9 +44,10 @@ async def extract_webpage(
 @router.get("/download_file")
 def download_file(
     url: Annotated[str, "URL of the file to download"],
-    save_path: Annotated[str, "Path to save the downloaded file"]
+    save_dir: Annotated[str, "Directory to save the downloaded file"],
+    file_name: Annotated[Optional[str], "Name of the file to save (optional)"] = None
 ) -> Annotated[bool, "True if the file was downloaded successfully, False otherwise"]:
-    return WebUtil.download_file(url, save_path)
+    return WebUtil.download_file(url, save_dir, file_name)
 
 app.include_router(router, prefix="/api/web_search_util")
 
