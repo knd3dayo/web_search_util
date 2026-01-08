@@ -28,6 +28,9 @@ async def ddgs_search(
     site: Annotated[str, "Site to restrict the search to (optional)"] = "",
     detail: Annotated[bool, "If True, returns detailed results including the page content and a list of links from the result pages. Default is False"] = False
 ) -> Annotated[list[WebSearchResult], "List of search results from DuckDuckGo"]:
+    """
+    This function performs a search using DuckDuckGo and returns the results.
+    """
     return await WebUtil.ddgs_search(query, max_results, site, detail)
         
         
@@ -36,6 +39,9 @@ async def ddgs_search(
 async def extract_webpage(
     url: Annotated[str, "URL of the web page to extract text and links from"]
 ) -> Annotated[WebSearchResult|None, "Dictionary containing 'output' (extracted text) and 'urls' (list of links with href and link text)"]:
+    """
+    This function extracts text and links from the specified web page URL.
+    """
     web_search_result = await WebUtil.extract_webpage(url)
     return web_search_result
 
@@ -47,6 +53,9 @@ def download_file(
     save_dir: Annotated[str, "Directory to save the downloaded file"],
     file_name: Annotated[Optional[str], "Name of the file to save (optional)"] = None
 ) -> Annotated[str, "Path to the downloaded file"]:
+    """
+    This function downloads a file from the specified URL and saves it to the given directory.
+    """
     return WebUtil.download_file(url, save_dir, file_name)
 
 app.include_router(router, prefix="/api/web_search_util")
